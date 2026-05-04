@@ -4,6 +4,20 @@ export function usePreloadFrames(totalFrames: number, framePath: (index: number)
     const [isLoaded, setIsLoaded] = useState(false);
     const [progress, setProgress] = useState(0);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
+    const [isWindowLoaded, setIsWindowLoaded] = useState(
+        typeof window !== 'undefined' ? document.readyState === 'complete' : false
+    );
+
+    // Track global window load event for all page assets
+    useEffect(() => {
+        if (document.readyState === 'complete') {
+            setIsWindowLoaded(true);
+        } else {
+            const handleWindowLoad = () => setIsWindowLoaded(true);
+            window.addEventListener('load', handleWindowLoad);
+            return () => window.removeEventListener('load', handleWindowLoad);
+        }
+    }, []);
 
     useEffect(() => {
         let loaded = 0;
@@ -36,5 +50,8 @@ export function usePreloadFrames(totalFrames: number, framePath: (index: number)
         };
     }, [totalFrames, framePath]);
 
-    return { isLoaded, progress, images };
+    // Only consider fully loaded when both frames and window assets are ready
+    const isFullyLoaded = isLoaded && isWindowLoaded;
+
+    return { isLoaded: isFullyLoaded, progress, images };
 }
