@@ -6,6 +6,8 @@ export const SITE_CONTACT = {
     whatsappDigits: '919239605654',
     addressLine:
         '3RD, FLAT NO. 3B, 3/19, VIDYASAGAR COLONY, KOLKATA, Kolkata, West Bengal, 700047',
+    /** Compact address for narrow UI (nav strip, cards) */
+    addressShort: 'Flat 3B, Vidyasagar Colony, Kolkata 700047',
 } as const;
 
 export function whatsappChatUrl(prefill?: string): string {

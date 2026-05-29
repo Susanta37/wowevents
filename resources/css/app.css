@@ -176,6 +176,12 @@
     );
 }
 
+/* Prevent horizontal bleed on mobile without changing sticky parents */
+html,
+body {
+    overflow-x: clip;
+}
+
 /* Custom marketing cursor hides system pointer (desktop + CustomCursor.tsx) */
 html.marketing-cursor-active,
 html.marketing-cursor-active * {

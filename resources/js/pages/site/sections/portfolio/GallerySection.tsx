@@ -1,4 +1,7 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
+import { Link } from '@inertiajs/react';
+import { ArrowUpRight, Eye, Maximize2, Sparkles } from 'lucide-react';
 import { SectionWrapper } from '@/components/SectionWrapper';
 
 import type { PortfolioItem } from './types';
@@ -8,73 +11,296 @@ type Props = {
     openLightbox: (item: PortfolioItem) => void;
 };
 
+const easeLuxury = [0.25, 0.46, 0.45, 0.94];
+
+const imageVariants = {
+    hidden: {
+        opacity: 0,
+        y: 60,
+        filter: 'blur(12px)',
+        scale: 0.95,
+    },
+    visible: (idx: number) => ({
+        opacity: 1,
+        y: 0,
+        filter: 'blur(0px)',
+        scale: 1,
+        transition: {
+            delay: (idx % 6) * 0.08,
+            duration: 0.8,
+            ease: easeLuxury,
+        },
+    }),
+};
+
 export function GallerySection({ items, openLightbox }: Props) {
     const prefersReducedMotion = useReducedMotion();
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+    // Filter items to only show those with valid paths
+    const galleryItems = items.filter((item) =>
+        item.src.startsWith('/assets/'),
+    );
+
+    // Create varied aspect ratios for natural masonry feel
+    const getAspectRatio = (idx: number) => {
+        const ratios = [
+            'aspect-[3/4]',
+            'aspect-[4/5]',
+            'aspect-[2/3]',
+            'aspect-[4/5]',
+            'aspect-[3/4]',
+            'aspect-[1/1]',
+        ];
+        return ratios[idx % ratios.length];
+    };
 
     return (
-        <SectionWrapper className="mx-auto max-w-[1400px] px-6 pt-14 pb-28 lg:px-10 lg:pb-32">
-            <div className="columns-1 gap-6 sm:columns-2 xl:columns-3">
-                {items.map((item, idx) => (
-                    <motion.div
-                        key={item.src + item.title}
-                        className="mb-6 break-inside-avoid"
-                        initial={prefersReducedMotion ? undefined : { opacity: 0, y: 48 }}
-                        whileInView={
-                            prefersReducedMotion
-                                ? undefined
-                                : {
-                                      opacity: 1,
-                                      y: 0,
-                                      transition: {
-                                          delay: (idx % 6) * 0.06,
-                                          duration: 0.68,
-                                          ease: [0.42, 0, 0.58, 1],
-                                      },
-                                  }
-                        }
-                        viewport={{ once: true, margin: '-8%', amount: 0.2 }}
-                    >
-                        <button
-                            type="button"
-                            onClick={() => openLightbox(item)}
-                            className="group relative block w-full overflow-hidden rounded-2xl border border-white/[0.06] text-left"
+        <SectionWrapper id="gallery-section" className="relative mx-auto max-w-[1400px] overflow-visible px-6 pt-14 pb-28 lg:px-10 lg:pb-40">
+            {/* Ambient gold glow */}
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-40 left-1/2 h-[700px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.04)_0%,transparent_60%)] blur-3xl"
+            />
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-32 right-0 h-[500px] w-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,47,47,0.08)_0%,transparent_60%)] blur-3xl"
+            />
+
+            {/* Section sub-header */}
+            <motion.div
+                initial={
+                    prefersReducedMotion
+                        ? undefined
+                        : { opacity: 0, y: 20 }
+                }
+                whileInView={
+                    prefersReducedMotion
+                        ? undefined
+                        : {
+                              opacity: 1,
+                              y: 0,
+                              transition: {
+                                  duration: 0.7,
+                                  ease: easeLuxury,
+                              },
+                          }
+                }
+                viewport={{ once: true }}
+                className="mb-12 flex items-center justify-between"
+            >
+                <div className="flex items-center gap-3">
+                    <span className="h-px w-8 bg-gradient-to-r from-[#d4af37]/40 to-transparent" />
+                    <span className="text-[9px] uppercase tracking-[0.4em] text-stone-500">
+                        {galleryItems.length} compositions
+                    </span>
+                </div>
+                <span className="hidden text-[9px] uppercase tracking-[0.35em] text-stone-600 sm:block">
+                    Click to enlarge
+                </span>
+            </motion.div>
+
+            {/* Masonry Grid */}
+            <div className="columns-1 gap-5 sm:columns-2 sm:gap-6 xl:columns-3">
+                {galleryItems.map((item, idx) => {
+                    const isHovered = hoveredIndex === idx;
+                    const aspectClass = getAspectRatio(idx);
+
+                    return (
+                        <motion.div
+                            key={item.src + item.title}
+                            className="mb-5 break-inside-avoid sm:mb-6"
+                            variants={imageVariants}
+                            custom={idx}
+                            initial={
+                                prefersReducedMotion ? undefined : 'hidden'
+                            }
+                            whileInView="visible"
+                            viewport={{
+                                once: true,
+                                margin: '-8%',
+                                amount: 0.15,
+                            }}
+                            onMouseEnter={() => setHoveredIndex(idx)}
+                            onMouseLeave={() => setHoveredIndex(null)}
                         >
-                            <motion.img
-                                src={item.src}
-                                alt={item.alt}
-                                loading="lazy"
-                                decoding="async"
-                                className="w-full brightness-[0.72]"
-                                whileHover={
-                                    prefersReducedMotion
-                                        ? undefined
-                                        : {
-                                              scale: 1.045,
-                                              filter: 'brightness(0.92)',
-                                              transition: {
-                                                  duration: 0.72,
-                                                  ease: [0.42, 0, 0.58, 1],
-                                              },
-                                          }
-                                }
-                                transition={{
-                                    duration: 0.72,
-                                    ease: [0.42, 0, 0.58, 1],
-                                }}
-                            />
-                            <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-[#0a0a0a]/88 via-transparent to-transparent opacity-80" />
-                            <div className="absolute inset-x-0 bottom-0 p-6">
-                                <p className="text-[10px] uppercase tracking-[0.26em] text-[#d4af37]/90">
-                                    {item.category}
-                                </p>
-                                <p className="mt-2 font-display text-lg text-stone-100">
-                                    {item.title}
-                                </p>
-                            </div>
-                        </button>
-                    </motion.div>
-                ))}
+                            <button
+                                type="button"
+                                onClick={() => openLightbox(item)}
+                                className="group relative block w-full overflow-hidden rounded-2xl border border-white/[0.05] bg-[#0a0a0a] text-left transition-all duration-700 hover:border-[#d4af37]/20"
+                            >
+                                {/* Hover glow effect */}
+                                <div
+                                    aria-hidden="true"
+                                    className={`pointer-events-none absolute -inset-2 rounded-3xl bg-[radial-gradient(circle_at_50%_50%,rgba(212,175,55,0.12)_0%,transparent_70%)] blur-xl transition-all duration-1000 ${
+                                        isHovered
+                                            ? 'opacity-100 scale-105'
+                                            : 'opacity-0 scale-100'
+                                    }`}
+                                />
+
+                                {/* Image Container */}
+                                <div
+                                    className={`relative ${aspectClass} overflow-hidden`}
+                                >
+                                    <motion.img
+                                        src={item.src}
+                                        alt={item.alt}
+                                        loading="lazy"
+                                        decoding="async"
+                                        className="h-full w-full object-cover brightness-[0.65] transition-all duration-700"
+                                        whileHover={
+                                            prefersReducedMotion
+                                                ? undefined
+                                                : {
+                                                      scale: 1.05,
+                                                      transition: {
+                                                          duration: 0.8,
+                                                          ease: easeLuxury,
+                                                      },
+                                                  }
+                                        }
+                                    />
+
+                                    {/* Overlay gradients */}
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/95 via-[#0a0a0a]/30 to-transparent opacity-80 transition-opacity duration-700 group-hover:opacity-70" />
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/20 to-transparent" />
+
+                                    {/* Quick view button on hover */}
+                                    <AnimatePresence>
+                                        {isHovered && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.8 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4"
+                                            >
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-[#0a0a0a]/70 backdrop-blur-md transition-all duration-500 group-hover:border-[#d4af37]/30 group-hover:bg-[#d4af37]/10 sm:h-10 sm:w-10">
+                                                    <Maximize2 className="h-3.5 w-3.5 text-white/70 transition-colors duration-500 group-hover:text-[#d4af37] sm:h-4 sm:w-4" />
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Category badge */}
+                                    <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
+                                        <span className="inline-block rounded-full border border-white/[0.08] bg-[#0a0a0a]/60 px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-[#d4af37]/80 backdrop-blur-sm transition-all duration-500 group-hover:border-[#d4af37]/25 group-hover:bg-[#d4af37]/8 sm:px-3 sm:text-[10px]">
+                                            {item.category}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                                    <h3 className="font-display text-lg text-stone-100 transition-colors duration-500 group-hover:text-white sm:text-xl">
+                                        {item.title}
+                                    </h3>
+                                    {item.subtitle && (
+                                        <p className="mt-1.5 max-w-xs text-[13px] leading-relaxed text-stone-400 transition-colors duration-500 group-hover:text-stone-300 sm:text-sm">
+                                            {item.subtitle}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Bottom gold accent line */}
+                                <div
+                                    aria-hidden="true"
+                                    className={`absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-[#d4af37]/50 to-transparent transition-all duration-700 ${
+                                        isHovered ? 'w-full' : 'w-0'
+                                    }`}
+                                />
+
+                                {/* Corner accents on hover */}
+                                <div
+                                    aria-hidden="true"
+                                    className={`absolute right-2 top-2 h-6 w-6 border-r border-t transition-all duration-700 sm:right-3 sm:top-3 ${
+                                        isHovered
+                                            ? 'border-[#d4af37]/20'
+                                            : 'border-transparent'
+                                    }`}
+                                />
+                                <div
+                                    aria-hidden="true"
+                                    className={`absolute bottom-2 left-2 h-6 w-6 border-b border-l transition-all duration-700 sm:bottom-3 sm:left-3 ${
+                                        isHovered
+                                            ? 'border-[#d4af37]/20'
+                                            : 'border-transparent'
+                                    }`}
+                                />
+                            </button>
+                        </motion.div>
+                    );
+                })}
             </div>
+
+            {/* Empty state */}
+            {galleryItems.length === 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center justify-center py-32 text-center"
+                >
+                    <Eye className="mb-6 h-12 w-12 text-stone-700" />
+                    <p className="font-display text-xl text-stone-500">
+                        No compositions yet
+                    </p>
+                    <p className="mt-2 text-sm text-stone-600">
+                        Check back soon for curated work.
+                    </p>
+                </motion.div>
+            )}
+
+            {/* Bottom CTA */}
+            <motion.div
+                initial={
+                    prefersReducedMotion
+                        ? undefined
+                        : { opacity: 0, y: 30 }
+                }
+                whileInView={
+                    prefersReducedMotion
+                        ? undefined
+                        : {
+                              opacity: 1,
+                              y: 0,
+                              transition: {
+                                  duration: 0.8,
+                                  delay: 0.5,
+                                  ease: easeLuxury,
+                              },
+                          }
+                }
+                viewport={{ once: true }}
+                className="mt-16 flex flex-col items-center gap-6 sm:flex-row sm:justify-center"
+            >
+                <Link
+                    href="/book-now"
+                    prefetch
+                    className="group inline-flex items-center gap-3 rounded-full border border-[#d4af37]/25 bg-[#d4af37]/5 px-8 py-4 text-xs uppercase tracking-[0.3em] text-[#d4af37] backdrop-blur-sm transition-all duration-500 hover:border-[#d4af37]/45 hover:bg-[#d4af37]/10 hover:shadow-[0_0_50px_-15px_rgb(212_175_55_/_0.35)]"
+                >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Commission your atmosphere</span>
+                    <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+            </motion.div>
+
+            {/* Bottom decorative element */}
+            <motion.div
+                aria-hidden="true"
+                initial={{ opacity: 0, scaleX: 0 }}
+                whileInView={{
+                    opacity: 1,
+                    scaleX: 1,
+                    transition: {
+                        duration: 1.2,
+                        delay: 0.7,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                    },
+                }}
+                viewport={{ once: true }}
+                className="mx-auto mt-16 h-px w-full max-w-md bg-gradient-to-r from-transparent via-[#d4af37]/15 to-transparent"
+            />
         </SectionWrapper>
     );
 }

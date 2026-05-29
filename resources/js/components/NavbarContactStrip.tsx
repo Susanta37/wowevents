@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { SITE_CONTACT, whatsappChatUrl } from '@/constants/site-contact';
@@ -11,10 +11,6 @@ const SCROLL_DIRECTION_ZONE_PX = 72;
 /** Ignore tiny wheel jitter; larger = fewer accidental toggles. */
 const SCROLL_DELTA_PX = 10;
 
-/**
- * Contact / address row above the main navbar. Hides while scrolling down,
- * reappears near the top of the page or when scrolling up.
- */
 function initialStripVisible(): boolean {
     if (typeof window === 'undefined') {
         return true;
@@ -23,6 +19,13 @@ function initialStripVisible(): boolean {
     return window.scrollY < SCROLL_DIRECTION_ZONE_PX;
 }
 
+const tapRow =
+    'inline-flex min-h-[44px] w-full max-w-full items-center justify-center gap-2 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-white/[0.04] hover:text-[#d4af37] sm:min-h-0 sm:w-auto sm:justify-start sm:rounded-none sm:px-0 sm:py-0 sm:hover:bg-transparent';
+
+/**
+ * Contact / address row above the main navbar. Hides while scrolling down,
+ * reappears near the top of the page or when scrolling up.
+ */
 export function NavbarContactStrip() {
     const [visible, setVisible] = useState(initialStripVisible);
     const lastY = useRef(0);
@@ -84,8 +87,12 @@ export function NavbarContactStrip() {
 
     const waBare = whatsappChatUrl();
 
-    const linkMuted =
-        'inline-flex max-w-full items-center gap-2 text-stone-500 transition-colors hover:text-[#d4af37]';
+    const linkMuted = cn(
+        'text-stone-500 transition-colors hover:text-[#d4af37]',
+        tapRow,
+        // Mobile: icon-only buttons
+        'sm:py-0 sm:px-0 sm:w-auto sm:min-h-0 sm:rounded-none',
+    );
 
     return (
         <div
@@ -94,69 +101,72 @@ export function NavbarContactStrip() {
                 'overflow-hidden border-b border-white/[0.06] bg-[#060606]/95 backdrop-blur-sm',
                 'transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none',
                 visible
-                    ? 'max-h-[280px] opacity-100'
+                    ? 'max-h-[min(72vh,520px)] opacity-100 sm:max-h-[300px] lg:max-h-[280px]'
                     : 'pointer-events-none max-h-0 border-transparent opacity-0',
             )}
         >
             <div className="text-[11px] leading-snug text-stone-500">
-                <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-2 px-4 py-2.5 text-center sm:px-6 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-10 lg:gap-y-1 lg:px-10 lg:text-left">
-                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 lg:justify-start lg:gap-x-6">
+                <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-3 py-3 sm:gap-2 sm:px-5 sm:py-2.5 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-10 lg:px-10">
+                    <div className="flex w-full items-center justify-center gap-2 sm:w-auto sm:flex-wrap sm:justify-center sm:gap-x-4 lg:justify-start lg:gap-x-6">
                         <a
                             href={`mailto:${SITE_CONTACT.email}`}
-                            className={linkMuted}
+                            className={cn(
+                                linkMuted,
+                                'w-11 justify-center gap-0 sm:w-auto sm:justify-start sm:gap-2',
+                            )}
                             title={SITE_CONTACT.email}
                             tabIndex={visible ? undefined : -1}
                         >
-                            <Mail className="size-3.5 shrink-0 text-[#d4af37]/60" />
-                            <span className="truncate font-medium tracking-wide">
+                            <Mail className="size-4 shrink-0 text-[#d4af37]/60 sm:size-3.5" />
+                            <span className="sr-only">Email</span>
+                            <span className="hidden min-w-0 flex-1 truncate font-medium tracking-wide sm:inline sm:max-w-[14rem] lg:max-w-none">
                                 {SITE_CONTACT.email}
                             </span>
                         </a>
-                        <span
-                            className="hidden h-3 w-px shrink-0 bg-white/15 sm:inline"
-                            aria-hidden
-                        />
                         <a
                             href={`tel:${SITE_CONTACT.phoneE164}`}
-                            className={linkMuted}
+                            className={cn(
+                                linkMuted,
+                                'w-11 justify-center gap-0 sm:w-auto sm:justify-start sm:gap-2',
+                            )}
                             tabIndex={visible ? undefined : -1}
                         >
-                            <Phone className="size-3.5 shrink-0 text-[#d4af37]/60" />
-                            <span className="whitespace-nowrap font-medium tracking-wider tabular-nums">
-                                {SITE_CONTACT.phoneDisplay}
+                            <Phone className="size-4 shrink-0 text-[#d4af37]/60 sm:size-3.5" />
+                            <span className="sr-only">Call</span>
+                            <span className="hidden whitespace-nowrap font-medium tabular-nums tracking-wider sm:inline">
+                                +91 {SITE_CONTACT.phoneDisplay}
                             </span>
                         </a>
-                        <span
-                            className="hidden h-3 w-px shrink-0 bg-white/15 lg:inline"
-                            aria-hidden
-                        />
                         <a
                             href={waBare}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`hidden lg:inline-flex ${linkMuted}`}
+                            className={cn(
+                                linkMuted,
+                                'w-11 justify-center gap-0 font-sans text-[10px] uppercase tracking-[0.26em] text-[#d4af37]/85 sm:w-auto sm:justify-start sm:gap-2',
+                            )}
                             tabIndex={visible ? undefined : -1}
                         >
-                            <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-[#d4af37]/80">
-                                WhatsApp
-                            </span>
+                            {/* Keep text only on sm+; on mobile show icon-only */}
+                            <MessageCircle
+                                className="size-4 shrink-0 text-[#d4af37]/60 sm:size-3.5"
+                                aria-hidden
+                            />
+                            <span className="sr-only">WhatsApp</span>
+                            <span className="hidden sm:inline">WhatsApp</span>
                         </a>
                     </div>
-                    <p className="flex max-w-2xl items-start justify-center gap-2 text-pretty lg:justify-end lg:text-end">
-                        <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#d4af37]/55 lg:mt-px" />
-                        <span>{SITE_CONTACT.addressLine}</span>
-                    </p>
-                    <a
-                        href={waBare}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`lg:hidden ${linkMuted}`}
-                        tabIndex={visible ? undefined : -1}
-                    >
-                        <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-[#d4af37]/80">
-                            WhatsApp chat
+
+                    <p className="flex w-full items-start justify-center gap-2 text-pretty text-[10px] leading-relaxed sm:text-[11px] lg:max-w-xl lg:justify-end lg:text-end lg:text-[11px]">
+                        <MapPin
+                            className="mt-0.5 size-4 shrink-0 text-[#d4af37]/55 sm:size-3.5 lg:mt-px"
+                            aria-hidden
+                        />
+                        <span className="text-left lg:text-end">
+                            <span className="lg:hidden">{SITE_CONTACT.addressShort}</span>
+                            <span className="hidden lg:inline">{SITE_CONTACT.addressLine}</span>
                         </span>
-                    </a>
+                    </p>
                 </div>
             </div>
         </div>

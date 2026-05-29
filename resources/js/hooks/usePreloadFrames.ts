@@ -1,57 +1,95 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-export function usePreloadFrames(totalFrames: number, framePath: (index: number) => string) {
+export function usePreloadFrames(
+    totalFrames: number,
+    framePath: (index: number) => string,
+    enabled = true,
+) {
     const [isLoaded, setIsLoaded] = useState(false);
     const [progress, setProgress] = useState(0);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
     const [isWindowLoaded, setIsWindowLoaded] = useState(
-        typeof window !== 'undefined' ? document.readyState === 'complete' : false
+        typeof window !== 'undefined' ? document.readyState === 'complete' : false,
     );
 
-    // Track global window load event for all page assets
     useEffect(() => {
-        if (document.readyState === 'complete') {
-            setIsWindowLoaded(true);
-        } else {
-            const handleWindowLoad = () => setIsWindowLoaded(true);
-            window.addEventListener('load', handleWindowLoad);
-            return () => window.removeEventListener('load', handleWindowLoad);
+        if (typeof document === 'undefined') {
+            return;
         }
+
+        if (document.readyState === 'complete') {
+            return;
+        }
+
+        const handleWindowLoad = () => setIsWindowLoaded(true);
+        window.addEventListener('load', handleWindowLoad);
+
+        return () => window.removeEventListener('load', handleWindowLoad);
     }, []);
 
     useEffect(() => {
-        let loaded = 0;
-        let isCancelled = false;
-        const loadedImages: HTMLImageElement[] = [];
+        let cancelled = false;
 
-        for (let i = 1; i <= totalFrames; i++) {
-            const img = new Image();
-            
-            const handleLoad = () => {
-                if (isCancelled) return;
-                loaded++;
-                setProgress(loaded / totalFrames);
-                if (loaded === totalFrames) {
-                    setIsLoaded(true);
+        if (!enabled) {
+            queueMicrotask(() => {
+                if (cancelled) {
+                    return;
                 }
+
+                setIsLoaded(true);
+                setProgress(1);
+                setImages([]);
+            });
+
+            return () => {
+                cancelled = true;
             };
-
-            img.onload = handleLoad;
-            img.onerror = handleLoad; // Continue even on error to prevent hanging
-
-            img.src = framePath(i);
-            loadedImages.push(img);
         }
-        
-        setImages(loadedImages);
+
+        queueMicrotask(() => {
+            if (cancelled) {
+                return;
+            }
+
+            setIsLoaded(false);
+            setProgress(0);
+
+            let loaded = 0;
+            const loadedImages: HTMLImageElement[] = [];
+
+            for (let i = 1; i <= totalFrames; i++) {
+                const img = new Image();
+
+                const handleLoad = () => {
+                    if (cancelled) {
+                        return;
+                    }
+
+                    loaded++;
+                    setProgress(loaded / totalFrames);
+
+                    if (loaded === totalFrames) {
+                        setIsLoaded(true);
+                    }
+                };
+
+                img.onload = handleLoad;
+                img.onerror = handleLoad;
+                img.src = framePath(i);
+                loadedImages.push(img);
+            }
+
+            if (!cancelled) {
+                setImages(loadedImages);
+            }
+        });
 
         return () => {
-            isCancelled = true;
+            cancelled = true;
         };
-    }, [totalFrames, framePath]);
+    }, [enabled, totalFrames, framePath]);
 
-    // Only consider fully loaded when both frames and window assets are ready
-    const isFullyLoaded = isLoaded && isWindowLoaded;
+    const isFullyLoaded = enabled ? isLoaded && isWindowLoaded : true;
 
     return { isLoaded: isFullyLoaded, progress, images };
 }

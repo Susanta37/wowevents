@@ -31,11 +31,12 @@ export function CompanyStorySection() {
                 className="overflow-hidden rounded-3xl border border-white/[0.07] shadow-[0_60px_120px_-72px_rgb(212_175_55_/_0.45)]"
             >
                 <img
-                    src="https://images.unsplash.com/photo-1522673607200-164d1b621b47?q=80&w=1800&auto=format&fit=crop"
+                    src="/logo/logo.png"
+                    
                     alt="Refined seaside ceremony"
                     loading="lazy"
                     decoding="async"
-                    className="aspect-[5/6] w-full object-cover brightness-90"
+                    className=" w-full object-cover brightness-90"
                 />
             </motion.div>
             <div>

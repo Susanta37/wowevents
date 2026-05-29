@@ -5,7 +5,17 @@ function lerp(start: number, end: number, factor: number) {
     return start + (end - start) * factor;
 }
 
-export function useScrollFrames(totalFrames: number, framePath: (index: number) => string) {
+type ScrollFramesOptions = {
+    /** When false (e.g. mobile), no frame download and no RAF canvas loop */
+    enabled?: boolean;
+};
+
+export function useScrollFrames(
+    totalFrames: number,
+    framePath: (index: number) => string,
+    options?: ScrollFramesOptions,
+) {
+    const enabled = options?.enabled ?? true;
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const imagesRef = useRef<HTMLImageElement[]>([]);
@@ -15,26 +25,42 @@ export function useScrollFrames(totalFrames: number, framePath: (index: number) 
     const scrollCurrent = useRef(0);
     const lastDrawnFrame = useRef(-1);
 
-    const { isLoaded, progress: loadProgress, images } = usePreloadFrames(totalFrames, framePath);
+    const { isLoaded, progress: loadProgress, images } = usePreloadFrames(
+        totalFrames,
+        framePath,
+        enabled,
+    );
 
     // Update images ref when loaded
     useEffect(() => {
         imagesRef.current = images;
     }, [images]);
 
-    // Render loop and scroll tracking
+    // Render loop and scroll tracking (desktop / md+ only)
     useEffect(() => {
+        if (!enabled) {
+            return;
+        }
+
         let animationFrameId: number;
 
         const onScroll = () => {
-            if (!containerRef.current) return;
+            if (!containerRef.current) {
+                return;
+            }
+
             const rect = containerRef.current.getBoundingClientRect();
             // rect.top is 0 when container is at the top of the viewport
             const maxScroll = rect.height - window.innerHeight;
             let currentScroll = -rect.top;
 
-            if (currentScroll < 0) currentScroll = 0;
-            if (currentScroll > maxScroll) currentScroll = maxScroll;
+            if (currentScroll < 0) {
+                currentScroll = 0;
+            }
+
+            if (currentScroll > maxScroll) {
+                currentScroll = maxScroll;
+            }
 
             scrollTarget.current = maxScroll > 0 ? currentScroll / maxScroll : 0;
         };
@@ -44,7 +70,7 @@ export function useScrollFrames(totalFrames: number, framePath: (index: number) 
 
             const prev = scrollCurrent.current;
             const target = scrollTarget.current;
-            
+
             if (Math.abs(target - prev) < 0.0001) {
                 scrollCurrent.current = target;
             } else {
@@ -52,10 +78,11 @@ export function useScrollFrames(totalFrames: number, framePath: (index: number) 
             }
 
             const currentProgress = scrollCurrent.current;
-            
+
             // Throttle state updates to reduce React re-renders, but allow enough precision for Framer Motion phases
             setProgress((prevProg) => {
                 const rounded = Math.round(currentProgress * 100) / 100;
+
                 return Math.abs(prevProg - rounded) >= 0.01 ? rounded : prevProg;
             });
 
@@ -68,13 +95,21 @@ export function useScrollFrames(totalFrames: number, framePath: (index: number) 
             if (frameIndex === lastDrawnFrame.current) {
                 return;
             }
+
             lastDrawnFrame.current = frameIndex;
 
             const canvas = canvasRef.current;
-            if (!canvas) return;
+
+            if (!canvas) {
+                return;
+            }
+
             const ctx = canvas.getContext('2d');
             const images = imagesRef.current;
-            if (!images || images.length === 0) return;
+
+            if (!images || images.length === 0) {
+                return;
+            }
 
             const img = images[frameIndex];
 
@@ -82,10 +117,10 @@ export function useScrollFrames(totalFrames: number, framePath: (index: number) 
                 // Device Pixel Ratio scaling (capped to 1.5 for performance)
                 const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
                 const rect = canvas.getBoundingClientRect();
-                
+
                 const displayWidth = rect.width;
                 const displayHeight = rect.height;
-                
+
                 const targetWidth = Math.floor(displayWidth * dpr);
                 const targetHeight = Math.floor(displayHeight * dpr);
 
@@ -126,7 +161,7 @@ export function useScrollFrames(totalFrames: number, framePath: (index: number) 
 
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onScroll);
-        
+
         onScroll();
         animationFrameId = requestAnimationFrame(renderFrame);
 
@@ -135,7 +170,7 @@ export function useScrollFrames(totalFrames: number, framePath: (index: number) 
             window.removeEventListener('resize', onScroll);
             cancelAnimationFrame(animationFrameId);
         };
-    }, [totalFrames]);
+    }, [totalFrames, enabled]);
 
     return { containerRef, canvasRef, progress, isLoaded, loadProgress };
 }

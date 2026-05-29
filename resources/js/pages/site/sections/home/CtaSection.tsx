@@ -36,8 +36,8 @@ const ctaOptions = [
     {
         icon: Phone,
         title: 'Direct line',
-        description: '+1 (212) 555-0199',
-        href: 'tel:+12125550199',
+        description: '+91 92396 05654',
+        href: 'tel:+919239605654',
         isPrimary: false,
     },
 ];

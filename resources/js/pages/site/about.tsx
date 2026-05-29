@@ -1,8 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { CompanyStorySection } from '@/pages/site/sections/about/CompanyStorySection';
-import { HeroSection } from '@/pages/site/sections/about/HeroSection';
+import { HeroIntroSection, HeroSection } from '@/pages/site/sections/about/HeroIntroSection';
 import { TeamSection } from '@/pages/site/sections/about/TeamSection';
 import { TimelineSection } from '@/pages/site/sections/about/TimelineSection';
+import { VisionMissionSection } from '@/pages/site/sections/about/VisionMissionSection';
 import type {
     TeamMember,
     TimelineItem,
@@ -17,10 +18,11 @@ export default function About({ timeline, team }: AboutProps) {
     return (
         <>
             <Head title="About" />
-            <HeroSection />
+            <HeroIntroSection/>
             <CompanyStorySection />
             <TimelineSection timeline={timeline} />
             <TeamSection team={team} />
+            <VisionMissionSection />
         </>
     );
 }

@@ -8,7 +8,7 @@ export default function ScrollSequenceHero() {
     // Generate the path to the current frame image
     const framePath = useCallback((index: number) => {
         const paddedIndex = String(index).padStart(3, '0');
-        return `/Event/ezgif-frame-${paddedIndex}.png`;
+        return `/Event/ezgif-frame-${paddedIndex}.webp`;
     }, []);
 
     const { containerRef, canvasRef, progress } = useScrollFrames(totalFrames, framePath);

@@ -1,22 +1,40 @@
-import { useCallback, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Link } from '@inertiajs/react';
-import { useScrollFrames } from '@/hooks/useScrollFrames';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { ArrowDown, Sparkles, Crown } from 'lucide-react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+
 import { Loader } from '@/components/Loader';
-import { ArrowDown, Sparkles, Crown, Star } from 'lucide-react';
+import { SITE_LOGO_ALT, SITE_LOGO_SRC } from '@/constants/brand-assets';
+import { useScrollFrames } from '@/hooks/useScrollFrames';
+
+const CINEMATIC_BREAKPOINT = '(min-width: 768px)';
+const MOBILE_HERO_POSTER = '/Event/ezgif-frame-001.webp';
 
 export function HeroSection() {
     const totalFrames = 240;
     const heroRef = useRef<HTMLDivElement>(null);
+    const [useCinematic, setUseCinematic] = useState(false);
+
+    useLayoutEffect(() => {
+        const mq = window.matchMedia(CINEMATIC_BREAKPOINT);
+        const apply = () => setUseCinematic(mq.matches);
+        apply();
+
+        mq.addEventListener('change', apply);
+
+        return () => mq.removeEventListener('change', apply);
+    }, []);
 
     const framePath = useCallback((index: number) => {
         const paddedIndex = String(index).padStart(3, '0');
-        return `/Event/ezgif-frame-${paddedIndex}.png`;
+
+        return `/Event/ezgif-frame-${paddedIndex}.webp`;
     }, []);
 
     const { containerRef, canvasRef, progress, isLoaded, loadProgress } = useScrollFrames(
         totalFrames,
         framePath,
+        { enabled: useCinematic },
     );
 
     // Parallax scroll values for overlay elements
@@ -35,13 +53,15 @@ export function HeroSection() {
         [0, 0.04, 0.12],
         [1, 0.6, 0],
     );
+    const progressBarWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
-    // Professional easing curve
-    const easeLuxury = [0.25, 0.46, 0.45, 0.94];
+    const easeLuxury: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
     return (
         <>
-            <Loader isLoaded={isLoaded} progress={loadProgress} />
+            {useCinematic ? (
+                <Loader isLoaded={isLoaded} progress={loadProgress} />
+            ) : null}
 
             {/* Desktop: Cinematic Scroll Sequence */}
             <section
@@ -121,8 +141,8 @@ export function HeroSection() {
                                     >
                                         {/* Logo */}
                                         <motion.img
-                                            src="/logo/logo.png"
-                                            alt="WOW Events"
+                                            src={SITE_LOGO_SRC}
+                                            alt={SITE_LOGO_ALT}
                                             initial={{
                                                 opacity: 0,
                                                 scale: 0.92,
@@ -212,19 +232,6 @@ export function HeroSection() {
                                         }}
                                         className="flex w-full max-w-6xl flex-col items-center px-4"
                                     >
-                                        {/* Decorative crown */}
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{
-                                                duration: 0.7,
-                                                delay: 0.25,
-                                                ease: 'easeOut',
-                                            }}
-                                            className="mb-10 text-[#D4AF37]/25"
-                                        >
-                                            <Crown className="h-9 w-9 md:h-12 md:w-12 lg:h-14 lg:w-14" />
-                                        </motion.div>
 
                                         <h1
                                             className="font-serif text-[2.75rem] font-bold leading-[1.1] tracking-tight md:text-6xl lg:text-[5.5rem]"
@@ -382,8 +389,8 @@ export function HeroSection() {
 
                                         {/* Logo above CTA */}
                                         <motion.img
-                                            src="/logo/logo.png"
-                                            alt="WOW Events"
+                                            src={SITE_LOGO_SRC}
+                                            alt={SITE_LOGO_ALT}
                                             initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             transition={{
@@ -478,47 +485,46 @@ export function HeroSection() {
                     <motion.div className="absolute bottom-0 left-0 right-0 z-30 h-px bg-white/[0.02]">
                         <motion.div
                             className="h-full bg-gradient-to-r from-[#D4AF37]/35 via-[#D4AF37]/55 to-[#D4AF37]/35"
-                            style={{
-                                width: useTransform(
-                                    scrollYProgress,
-                                    [0, 1],
-                                    ['0%', '100%'],
-                                ),
-                            }}
+                            style={{ width: progressBarWidth }}
                         />
                     </motion.div>
                 </div>
             </section>
 
-            {/* Mobile Fallback */}
-            <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-[#0A0A0A] md:hidden">
+            {/* Mobile: static hero — no 240-frame preload (instant first paint) */}
+            <section className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#0A0A0A] pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(4.5rem,env(safe-area-inset-top))] md:hidden">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2880&auto=format&fit=crop"
-                        alt="WOW Events Luxury Design"
-                        className="h-full w-full object-cover brightness-[0.25]"
+                        src={MOBILE_HERO_POSTER}
+                        alt=""
+                        className="h-full w-full object-cover brightness-[0.32]"
+                        width={1920}
+                        height={1080}
+                        sizes="100vw"
+                        decoding="async"
+                        fetchPriority="high"
                         loading="eager"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-[#0A0A0A]/80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/45 to-[#0A0A0A]/82" />
                 </div>
 
-                {/* Mobile ambient glow */}
                 <div
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-0 z-10"
                 >
-                    <div className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.1)_0%,transparent_60%)] blur-2xl" />
+                    <div className="absolute left-1/2 top-1/2 h-[min(90vw,420px)] w-[min(90vw,420px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.11)_0%,transparent_58%)]" />
                 </div>
 
-                <div className="relative z-20 flex w-full max-w-sm flex-col items-center px-6 pt-16 text-center">
-                    {/* Logo */}
+                <div className="relative z-20 flex w-full max-w-[min(100%,24rem)] flex-col items-center px-5 text-center sm:max-w-md">
                     <motion.img
-                        src="/logo/logo.png"
-                        alt="WOW Events"
+                        src={SITE_LOGO_SRC}
+                        alt={SITE_LOGO_ALT}
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, ease: easeLuxury }}
-                        className="mb-8 h-14 w-auto object-contain"
+                        width={280}
+                        height={120}
+                        className="mb-6 h-12 w-auto object-contain sm:mb-8 sm:h-14"
                     />
 
                     {/* Crown */}
@@ -536,7 +542,7 @@ export function HeroSection() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="font-serif text-3xl font-bold leading-[1.15] tracking-tight"
+                        className="font-serif text-[clamp(1.5rem,5.5vw,2.25rem)] font-bold leading-[1.12] tracking-tight sm:text-3xl"
                         style={{
                             background:
                                 'linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C)',
@@ -581,39 +587,28 @@ export function HeroSection() {
                         initial={{ width: 0 }}
                         animate={{ width: 120 }}
                         transition={{ duration: 0.7, delay: 0.7 }}
-                        className="mt-8 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+                        className="mt-6 h-px max-w-[min(100%,12rem)] bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent sm:mt-8"
                     />
 
-                    {/* Logo above CTA */}
-                    <motion.img
-                        src="/logo/logo.png"
-                        alt="WOW Events"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.6, delay: 0.75 }}
-                        className="mt-8 h-8 w-auto object-contain opacity-80"
-                    />
-
-                    {/* CTA Button */}
                     <motion.div
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.85 }}
-                        className="mt-6 w-full"
+                        transition={{ duration: 0.7, delay: 0.78 }}
+                        className="mt-6 w-full max-w-xs sm:max-w-sm"
                     >
                         <Link
                             href="/book-now"
-                            className="block w-full rounded-xl border border-[#D4AF37]/55 bg-gradient-to-br from-[#1a1a1a] to-[#0A0A0A] px-8 py-4 font-serif text-sm uppercase tracking-[0.22em] text-[#D4AF37] shadow-[0_0_30px_-10px_rgba(212,175,55,0.2)] transition-all duration-300 active:scale-[0.97]"
+                            prefetch
+                            className="flex min-h-[48px] w-full items-center justify-center rounded-xl border border-[#D4AF37]/55 bg-gradient-to-br from-[#1a1a1a] to-[#0A0A0A] px-6 py-3.5 font-serif text-[11px] uppercase tracking-[0.2em] text-[#D4AF37] shadow-[0_0_24px_-10px_rgba(212,175,55,0.22)] transition-all duration-300 active:scale-[0.98] sm:text-sm sm:tracking-[0.22em]"
                         >
                             Begin Your Journey
                         </Link>
                     </motion.div>
 
-                    {/* Portfolio link */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.95 }}
+                        transition={{ duration: 0.5, delay: 0.9 }}
                     >
                         <Link
                             href="/our-work"
