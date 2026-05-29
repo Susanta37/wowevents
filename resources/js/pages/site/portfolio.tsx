@@ -21,7 +21,13 @@ export default function Portfolio({ items, filters }: PortfolioProps) {
         <>
             <Head title="Our Work" />
             <IntroSection filters={filters} active={active} setActive={setActive} />
-            <GallerySection items={filtered} openLightbox={setLightbox} />
+            <GallerySection 
+                items={filtered} 
+                openLightbox={setLightbox} 
+                filters={filters}
+                active={active}
+                setActive={setActive}
+            />
             <LightboxDialog
                 item={lightbox}
                 onOpenChange={(open) => !open && setLightbox(null)}

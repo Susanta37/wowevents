@@ -24,7 +24,7 @@ class SiteContent
                 'slug' => 'corporate-warm-minimalism',
                 'excerpt' => 'Elevated brand moments for leadership retreats and board celebrations.',
                 'body' => "<p>Rare resin tables, tonal florals drawn from city skylines, and acoustic treatments hidden in greenery keep board summits focussed yet human.</p><p>Our teams script arrival flows that reduce bottleneck anxiety and design seating so every executive conversation has privacy without isolation.</p>",
-                'image' => 'https://images.unsplash.com/photo-1523580494863-6f303122598c?q=80&w=2400&auto=format&fit=crop',
+                'image' => '/assets/8.jpeg',
                 'date' => 'April 12, 2026',
             ],
             [

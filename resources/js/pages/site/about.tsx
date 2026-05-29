@@ -21,7 +21,7 @@ export default function About({ timeline, team }: AboutProps) {
             <HeroIntroSection/>
             <CompanyStorySection />
             <TimelineSection timeline={timeline} />
-            <TeamSection team={team} />
+            {/* <TeamSection team={team} /> */}
             <VisionMissionSection />
         </>
     );

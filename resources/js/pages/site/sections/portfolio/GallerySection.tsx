@@ -9,6 +9,9 @@ import type { PortfolioItem } from './types';
 type Props = {
     items: PortfolioItem[];
     openLightbox: (item: PortfolioItem) => void;
+    filters: string[];
+    active: string;
+    setActive: (f: string) => void;
 };
 
 const easeLuxury = [0.25, 0.46, 0.45, 0.94];
@@ -33,7 +36,7 @@ const imageVariants = {
     }),
 };
 
-export function GallerySection({ items, openLightbox }: Props) {
+export function GallerySection({ items, openLightbox, filters, active, setActive }: Props) {
     const prefersReducedMotion = useReducedMotion();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -98,6 +101,58 @@ export function GallerySection({ items, openLightbox }: Props) {
                 <span className="hidden text-[9px] uppercase tracking-[0.35em] text-stone-600 sm:block">
                     Click to enlarge
                 </span>
+            </motion.div>
+
+            {/* Filter Buttons */}
+            <motion.div
+                initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
+                whileInView={
+                    prefersReducedMotion
+                        ? undefined
+                        : {
+                                opacity: 1,
+                                y: 0,
+                                transition: { duration: 0.6, ease: easeLuxury },
+                            }
+                }
+                viewport={{ once: true }}
+                className="mb-10 flex flex-wrap gap-3"
+            >
+                {filters.map((f) => {
+                    const isActive = active === f;
+
+                    return (
+                        <motion.button
+                            key={f}
+                            type="button"
+                            onClick={() => setActive(f)}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className={`group relative overflow-hidden rounded-full border px-7 py-2.5 text-[10px] uppercase tracking-[0.25em] transition-all duration-500 md:text-[11px] ${
+                                isActive
+                                    ? 'border-[#d4af37]/50 bg-[#d4af37]/10 text-[#e8dfc4] shadow-[0_0_40px_-12px_rgb(212_175_55_/_0.5)]'
+                                    : 'border-white/[0.06] bg-white/[0.02] text-stone-500 hover:border-[#d4af37]/25 hover:text-stone-200'
+                            }`}
+                        >
+                            {isActive && (
+                                <motion.span
+                                    layoutId="activeFilterDotGallery"
+                                    className="absolute left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#d4af37]"
+                                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                />
+                            )}
+                            <div
+                                aria-hidden="true"
+                                className={`pointer-events-none absolute inset-0 bg-gradient-to-r from-[#d4af37]/0 via-[#d4af37]/5 to-[#d4af37]/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${
+                                    isActive ? 'opacity-50' : ''
+                                }`}
+                            />
+                            <span className={`relative transition-all duration-500 ${isActive ? 'pl-3' : ''}`}>
+                                {f}
+                            </span>
+                        </motion.button>
+                    );
+                })}
             </motion.div>
 
             {/* Masonry Grid */}
