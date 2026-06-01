@@ -4,14 +4,14 @@ import { Link } from '@inertiajs/react';
 import { ArrowUpRight, Eye, Maximize2, Sparkles } from 'lucide-react';
 import { SectionWrapper } from '@/components/SectionWrapper';
 
-import type { PortfolioItem } from './types';
+import type { PortfolioFilter, PortfolioItem } from './types';
+import { filterHref } from './utils';
 
 type Props = {
     items: PortfolioItem[];
     openLightbox: (item: PortfolioItem) => void;
-    filters: string[];
+    filters: PortfolioFilter[];
     active: string;
-    setActive: (f: string) => void;
 };
 
 const easeLuxury = [0.25, 0.46, 0.45, 0.94];
@@ -36,27 +36,11 @@ const imageVariants = {
     }),
 };
 
-export function GallerySection({ items, openLightbox, filters, active, setActive }: Props) {
+export function GallerySection({ items, openLightbox, filters, active }: Props) {
     const prefersReducedMotion = useReducedMotion();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-    // Filter items to only show those with valid paths
-    const galleryItems = items.filter((item) =>
-        item.src.startsWith('/assets/'),
-    );
-
-    // Create varied aspect ratios for natural masonry feel
-    const getAspectRatio = (idx: number) => {
-        const ratios = [
-            'aspect-[3/4]',
-            'aspect-[4/5]',
-            'aspect-[2/3]',
-            'aspect-[4/5]',
-            'aspect-[3/4]',
-            'aspect-[1/1]',
-        ];
-        return ratios[idx % ratios.length];
-    };
+    const galleryItems = items;
 
     return (
         <SectionWrapper id="gallery-section" className="relative mx-auto max-w-[1400px] overflow-visible px-6 pt-14 pb-28 lg:px-10 lg:pb-40">
@@ -116,41 +100,45 @@ export function GallerySection({ items, openLightbox, filters, active, setActive
                             }
                 }
                 viewport={{ once: true }}
-                className="mb-10 flex flex-wrap gap-3"
+                className="mb-10 flex flex-wrap gap-2 sm:gap-3"
             >
-                {filters.map((f) => {
-                    const isActive = active === f;
+                {filters.map((filter) => {
+                    const isActive = active === filter.label;
 
                     return (
-                        <motion.button
-                            key={f}
-                            type="button"
-                            onClick={() => setActive(f)}
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                            className={`group relative overflow-hidden rounded-full border px-7 py-2.5 text-[10px] uppercase tracking-[0.25em] transition-all duration-500 md:text-[11px] ${
-                                isActive
-                                    ? 'border-[#d4af37]/50 bg-[#d4af37]/10 text-[#e8dfc4] shadow-[0_0_40px_-12px_rgb(212_175_55_/_0.5)]'
-                                    : 'border-white/[0.06] bg-white/[0.02] text-stone-500 hover:border-[#d4af37]/25 hover:text-stone-200'
-                            }`}
+                        <Link
+                            key={filter.label}
+                            href={filterHref(filter)}
+                            prefetch
+                            preserveScroll
                         >
-                            {isActive && (
-                                <motion.span
-                                    layoutId="activeFilterDotGallery"
-                                    className="absolute left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#d4af37]"
-                                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                                />
-                            )}
-                            <div
-                                aria-hidden="true"
-                                className={`pointer-events-none absolute inset-0 bg-gradient-to-r from-[#d4af37]/0 via-[#d4af37]/5 to-[#d4af37]/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${
-                                    isActive ? 'opacity-50' : ''
+                            <motion.span
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
+                                className={`group relative inline-flex overflow-hidden rounded-full border px-5 py-2.5 text-[9px] uppercase tracking-[0.22em] transition-all duration-500 sm:px-6 md:text-[10px] md:tracking-[0.25em] ${
+                                    isActive
+                                        ? 'border-[#d4af37]/50 bg-[#d4af37]/10 text-[#e8dfc4] shadow-[0_0_40px_-12px_rgb(212_175_55_/_0.5)]'
+                                        : 'border-white/[0.06] bg-white/[0.02] text-stone-500 hover:border-[#d4af37]/25 hover:text-stone-200'
                                 }`}
-                            />
-                            <span className={`relative transition-all duration-500 ${isActive ? 'pl-3' : ''}`}>
-                                {f}
-                            </span>
-                        </motion.button>
+                            >
+                                {isActive && (
+                                    <motion.span
+                                        layoutId="activeFilterDotGallery"
+                                        className="absolute left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#d4af37]"
+                                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                    />
+                                )}
+                                <span
+                                    aria-hidden="true"
+                                    className={`pointer-events-none absolute inset-0 bg-gradient-to-r from-[#d4af37]/0 via-[#d4af37]/5 to-[#d4af37]/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${
+                                        isActive ? 'opacity-50' : ''
+                                    }`}
+                                />
+                                <span className={`relative transition-all duration-500 ${isActive ? 'pl-3' : ''}`}>
+                                    {filter.label}
+                                </span>
+                            </motion.span>
+                        </Link>
                     );
                 })}
             </motion.div>
@@ -159,11 +147,10 @@ export function GallerySection({ items, openLightbox, filters, active, setActive
             <div className="columns-1 gap-5 sm:columns-2 sm:gap-6 xl:columns-3">
                 {galleryItems.map((item, idx) => {
                     const isHovered = hoveredIndex === idx;
-                    const aspectClass = getAspectRatio(idx);
 
                     return (
                         <motion.div
-                            key={item.src + item.title}
+                            key={`${item.categorySlug}-${item.slug}`}
                             className="mb-5 break-inside-avoid sm:mb-6"
                             variants={imageVariants}
                             custom={idx}
@@ -184,44 +171,24 @@ export function GallerySection({ items, openLightbox, filters, active, setActive
                                 onClick={() => openLightbox(item)}
                                 className="group relative block w-full overflow-hidden rounded-2xl border border-white/[0.05] bg-[#0a0a0a] text-left transition-all duration-700 hover:border-[#d4af37]/20"
                             >
-                                {/* Hover glow effect */}
                                 <div
                                     aria-hidden="true"
-                                    className={`pointer-events-none absolute -inset-2 rounded-3xl bg-[radial-gradient(circle_at_50%_50%,rgba(212,175,55,0.12)_0%,transparent_70%)] blur-xl transition-all duration-1000 ${
+                                    className={`pointer-events-none absolute -inset-2 z-0 rounded-3xl bg-[radial-gradient(circle_at_50%_50%,rgba(212,175,55,0.12)_0%,transparent_70%)] blur-xl transition-all duration-1000 ${
                                         isHovered
-                                            ? 'opacity-100 scale-105'
-                                            : 'opacity-0 scale-100'
+                                            ? 'scale-105 opacity-100'
+                                            : 'scale-100 opacity-0'
                                     }`}
                                 />
 
-                                {/* Image Container */}
-                                <div
-                                    className={`relative ${aspectClass} overflow-hidden`}
-                                >
-                                    <motion.img
+                                <div className="relative flex w-full items-center justify-center bg-[#080808] p-2 sm:p-3">
+                                    <img
                                         src={item.src}
                                         alt={item.alt}
                                         loading="lazy"
                                         decoding="async"
-                                        className="h-full w-full object-cover brightness-[0.65] transition-all duration-700"
-                                        whileHover={
-                                            prefersReducedMotion
-                                                ? undefined
-                                                : {
-                                                      scale: 1.05,
-                                                      transition: {
-                                                          duration: 0.8,
-                                                          ease: easeLuxury,
-                                                      },
-                                                  }
-                                        }
+                                        className="relative z-10 h-auto w-full max-w-full object-contain brightness-[0.88] transition-all duration-700 group-hover:brightness-95"
                                     />
 
-                                    {/* Overlay gradients */}
-                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/95 via-[#0a0a0a]/30 to-transparent opacity-80 transition-opacity duration-700 group-hover:opacity-70" />
-                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/20 to-transparent" />
-
-                                    {/* Quick view button on hover */}
                                     <AnimatePresence>
                                         {isHovered && (
                                             <motion.div
@@ -229,58 +196,37 @@ export function GallerySection({ items, openLightbox, filters, active, setActive
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 exit={{ opacity: 0, scale: 0.8 }}
                                                 transition={{ duration: 0.3 }}
-                                                className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4"
+                                                className="absolute right-3 top-3 z-20 sm:right-4 sm:top-4"
                                             >
-                                                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-[#0a0a0a]/70 backdrop-blur-md transition-all duration-500 group-hover:border-[#d4af37]/30 group-hover:bg-[#d4af37]/10 sm:h-10 sm:w-10">
-                                                    <Maximize2 className="h-3.5 w-3.5 text-white/70 transition-colors duration-500 group-hover:text-[#d4af37] sm:h-4 sm:w-4" />
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-[#0a0a0a]/70 backdrop-blur-md sm:h-10 sm:w-10">
+                                                    <Maximize2 className="h-3.5 w-3.5 text-[#d4af37] sm:h-4 sm:w-4" />
                                                 </div>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
 
-                                    {/* Category badge */}
-                                    <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
-                                        <span className="inline-block rounded-full border border-white/[0.08] bg-[#0a0a0a]/60 px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-[#d4af37]/80 backdrop-blur-sm transition-all duration-500 group-hover:border-[#d4af37]/25 group-hover:bg-[#d4af37]/8 sm:px-3 sm:text-[10px]">
+                                    <div className="absolute left-3 top-3 z-20 sm:left-4 sm:top-4">
+                                        <span className="inline-block rounded-full border border-white/[0.08] bg-[#0a0a0a]/75 px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-[#d4af37]/80 backdrop-blur-sm sm:px-3 sm:text-[10px]">
                                             {item.category}
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* Content */}
-                                <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                                    <h3 className="font-display text-lg text-stone-100 transition-colors duration-500 group-hover:text-white sm:text-xl">
+                                <div className="relative border-t border-white/[0.04] bg-[#0a0a0a]/90 px-4 py-4 sm:px-5 sm:py-5">
+                                    <h3 className="font-display text-base text-stone-100 transition-colors duration-500 group-hover:text-white sm:text-lg">
                                         {item.title}
                                     </h3>
                                     {item.subtitle && (
-                                        <p className="mt-1.5 max-w-xs text-[13px] leading-relaxed text-stone-400 transition-colors duration-500 group-hover:text-stone-300 sm:text-sm">
+                                        <p className="mt-1.5 text-[13px] leading-relaxed text-stone-500 sm:text-sm">
                                             {item.subtitle}
                                         </p>
                                     )}
                                 </div>
 
-                                {/* Bottom gold accent line */}
                                 <div
                                     aria-hidden="true"
-                                    className={`absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-[#d4af37]/50 to-transparent transition-all duration-700 ${
+                                    className={`absolute bottom-0 left-0 z-10 h-[2px] bg-gradient-to-r from-[#d4af37]/50 to-transparent transition-all duration-700 ${
                                         isHovered ? 'w-full' : 'w-0'
-                                    }`}
-                                />
-
-                                {/* Corner accents on hover */}
-                                <div
-                                    aria-hidden="true"
-                                    className={`absolute right-2 top-2 h-6 w-6 border-r border-t transition-all duration-700 sm:right-3 sm:top-3 ${
-                                        isHovered
-                                            ? 'border-[#d4af37]/20'
-                                            : 'border-transparent'
-                                    }`}
-                                />
-                                <div
-                                    aria-hidden="true"
-                                    className={`absolute bottom-2 left-2 h-6 w-6 border-b border-l transition-all duration-700 sm:bottom-3 sm:left-3 ${
-                                        isHovered
-                                            ? 'border-[#d4af37]/20'
-                                            : 'border-transparent'
                                     }`}
                                 />
                             </button>

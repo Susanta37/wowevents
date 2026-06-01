@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [MarketingController::class, 'home'])->name('home');
 Route::get('/about', [MarketingController::class, 'about'])->name('about');
 Route::get('/services', [MarketingController::class, 'services'])->name('services');
+Route::get('/our-work/{category}/{slug}', [MarketingController::class, 'portfolioShow'])->name('portfolio.show');
+Route::get('/our-work/{category}', [MarketingController::class, 'portfolioCategory'])->name('portfolio.category');
 Route::get('/our-work', [MarketingController::class, 'portfolio'])->name('portfolio');
 Route::get('/blog', [MarketingController::class, 'blog'])->name('blog.index');
 Route::get('/blog/{slug}', [MarketingController::class, 'blogShow'])->name('blog.show');

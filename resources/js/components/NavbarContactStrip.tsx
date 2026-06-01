@@ -153,7 +153,9 @@ export function NavbarContactStrip() {
                                 aria-hidden
                             />
                             <span className="sr-only">WhatsApp</span>
-                            <span className="hidden sm:inline">WhatsApp</span>
+                            <span className="hidden whitespace-nowrap font-medium tabular-nums tracking-wider sm:inline">
+                                WhatsApp · +91 {SITE_CONTACT.phoneDisplay}
+                            </span>
                         </a>
                     </div>
 

@@ -2,12 +2,10 @@ import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Eye, Sparkles, ArrowRight } from 'lucide-react';
 
 type Props = {
-    filters: string[];
     active: string;
-    setActive: (f: string) => void;
 };
 
-export function IntroSection({ filters, active, setActive }: Props) {
+export function IntroSection({ active }: Props) {
     const prefersReducedMotion = useReducedMotion();
     const easeLuxury = [0.25, 0.46, 0.45, 0.94];
 

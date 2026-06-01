@@ -210,3 +210,22 @@ html.marketing-hide-native-scrollbar body::-webkit-scrollbar {
     height: 0;
     display: none;
 }
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-marquee {
+    animation: marquee 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-marquee {
+        animation: none;
+    }
+}

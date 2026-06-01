@@ -6,9 +6,9 @@ export function HeroSection() {
     const easeLuxury = [0.25, 0.46, 0.45, 0.94];
 
     const blogStats = [
-        { value: '200+', label: 'Curated Articles' },
-        { value: '12', label: 'Expert Voices' },
-        { value: 'Weekly', label: 'New Editions' },
+        { value: 'Expert', label: 'Curator Voices' },
+        { value: 'Field', label: 'Notes & Diaries' },
+        { value: 'Fresh', label: 'Monthly Editions' },
     ];
 
     return (

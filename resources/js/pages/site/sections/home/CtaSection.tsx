@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { SectionWrapper } from '@/components/SectionWrapper';
+import { SITE_CONTACT } from '@/constants/site-contact';
 
 const floatingElements = [
     { icon: Sparkles, delay: 0, duration: 6, x: '15%', y: '20%', size: 'sm' },
@@ -36,8 +37,8 @@ const ctaOptions = [
     {
         icon: Phone,
         title: 'Direct line',
-        description: '+91 92396 05654',
-        href: 'tel:+919239605654',
+        description: `+91 ${SITE_CONTACT.phoneDisplay}`,
+        href: `tel:${SITE_CONTACT.phoneE164}`,
         isPrimary: false,
     },
 ];

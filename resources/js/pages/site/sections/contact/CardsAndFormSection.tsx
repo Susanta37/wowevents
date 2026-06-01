@@ -5,7 +5,17 @@ import { SectionWrapper } from '@/components/SectionWrapper';
 import { SITE_CONTACT } from '@/constants/site-contact';
 import { siteFocusInputClass } from '@/pages/site/sections/shared/site-focus-input';
 
-const cards = [
+type ContactLine = string | { text: string; href: string };
+
+type ContactCard = {
+    icon: typeof MapPin;
+    label: string;
+    lines: ContactLine[];
+    accent: string;
+    gradient: string;
+};
+
+const cards: ContactCard[] = [
     {
         icon: MapPin,
         label: 'Studio',
@@ -16,16 +26,36 @@ const cards = [
     {
         icon: Mail,
         label: 'Correspondence',
-        lines: [SITE_CONTACT.email],
+        lines: [
+            {
+                text: SITE_CONTACT.email,
+                href: `mailto:${SITE_CONTACT.email}`,
+            },
+        ],
         accent: 'Response within 4 hours',
         gradient: 'from-[#c9a830]/20 to-[#c9a830]/5',
     },
     {
         icon: Phone,
-        label: 'Direct Signal',
-        lines: [SITE_CONTACT.phoneDisplay],
+        label: 'Mobile & WhatsApp',
+        lines: [
+            {
+                text: `+91 ${SITE_CONTACT.phoneDisplay}`,
+                href: `tel:${SITE_CONTACT.phoneE164}`,
+            },
+        ],
         accent: 'Mon–Sat, 10:00–19:00 IST',
         gradient: 'from-[#b8942e]/20 to-[#b8942e]/5',
+    },
+    {
+        icon: Phone,
+        label: 'Company numbers',
+        lines: SITE_CONTACT.companyNumbers.map((number) => ({
+            text: number.display,
+            href: `tel:${number.e164}`,
+        })),
+        accent: 'Office lines',
+        gradient: 'from-[#d4af37]/15 to-[#d4af37]/5',
     },
 ];
 
@@ -152,14 +182,29 @@ export function CardsAndFormSection() {
                                         <p className="text-[10px] uppercase tracking-[0.32em] text-stone-500 transition-colors duration-500 group-hover:text-stone-400">
                                             {card.label}
                                         </p>
-                                        {card.lines.map((line) => (
-                                            <p
-                                                key={line}
-                                                className="mt-2 font-display text-lg leading-snug text-stone-100 transition-colors duration-500 group-hover:text-white"
-                                            >
-                                                {line}
-                                            </p>
-                                        ))}
+                                        {card.lines.map((line) => {
+                                            const key =
+                                                typeof line === 'string'
+                                                    ? line
+                                                    : line.text;
+                                            const content =
+                                                typeof line === 'string' ? (
+                                                    <p className="mt-2 font-display text-lg leading-snug text-stone-100 transition-colors duration-500 group-hover:text-white">
+                                                        {line}
+                                                    </p>
+                                                ) : (
+                                                    <a
+                                                        href={line.href}
+                                                        className="mt-2 block font-display text-lg leading-snug text-stone-100 tabular-nums transition-colors duration-500 hover:text-[#d4af37] group-hover:text-white"
+                                                    >
+                                                        {line.text}
+                                                    </a>
+                                                );
+
+                                            return (
+                                                <div key={key}>{content}</div>
+                                            );
+                                        })}
                                         {/* Accent text */}
                                         <div className="mt-3 flex items-center gap-1.5">
                                             <Clock className="h-3 w-3 text-[#d4af37]/30" />
