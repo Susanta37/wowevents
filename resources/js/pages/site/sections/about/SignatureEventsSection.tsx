@@ -16,13 +16,13 @@ const events = [
         tag: 'Wedding',
     },
     {
-        title: 'Corporate Galas',
+        title: 'Site Installation',
         description:
-            'Leadership summits, product launches, and award nights engineered with brand precision and ballroom calm.',
-        image: '/assets/11.jpeg',
-        href: '/our-work/corporate',
+            'Welcome boards, branded backdrops, entrance gates, and on-site décor engineered with precision and ballroom calm.',
+        image: '/assets/8.jpeg',
+        href: '/our-work/site-installation',
         icon: Building2,
-        tag: 'Corporate',
+        tag: 'Site Installation',
     },
     {
         title: 'Luxury Experiences',

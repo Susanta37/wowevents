@@ -32,6 +32,7 @@ const portfolioLinks = [
     { label: 'Wedding Mandap', href: '/our-work/wedding-mandap' },
     { label: 'Reception Stage', href: '/our-work/reception-stage' },
     { label: 'Round Table Centerpiece', href: '/our-work/round-table-centerpiece' },
+    { label: 'Site Installation', href: '/our-work/site-installation' },
 ];
 
 const serviceLinks = [

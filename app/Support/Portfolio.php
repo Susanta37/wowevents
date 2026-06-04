@@ -9,6 +9,28 @@ class Portfolio
 {
     private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
+    /**
+     * Custom metadata by asset path: {folder}/{filename}
+     *
+     * @var array<string, array{title: string, slug?: string, category?: string, categorySlug?: string}>
+     */
+    private const FILENAME_OVERRIDES = [
+        'enterancegate/IMG_20260324_Birthday backdrop.jpg' => [
+            'title' => 'Birthday backdrop',
+            'slug' => 'birthday-backdrop',
+        ],
+        'enterancegate/Welcome board decor.jpg' => [
+            'title' => 'Welcome board decor',
+            'slug' => 'welcome-board-decor',
+        ],
+        'roundtablecenterpeices/site_installation.jpg' => [
+            'title' => 'Site installation',
+            'slug' => 'site-installation',
+            'category' => 'Site Installation',
+            'categorySlug' => 'site-installation',
+        ],
+    ];
+
     /** Wedding typology folders under public/assets */
     private const WEDDING_FOLDERS = [
         [
@@ -43,7 +65,7 @@ class Portfolio
             ['label' => 'Wedding Mandap', 'slug' => 'wedding-mandap'],
             ['label' => 'Reception Stage', 'slug' => 'reception-stage'],
             ['label' => 'Round Table Centerpiece', 'slug' => 'round-table-centerpiece'],
-            ['label' => 'Corporate', 'slug' => 'corporate'],
+            ['label' => 'Site Installation', 'slug' => 'site-installation'],
             ['label' => 'Luxury Events', 'slug' => 'luxury-events'],
         ];
     }
@@ -63,6 +85,10 @@ class Portfolio
     {
         if ($slug === null) {
             return 'All';
+        }
+
+        if ($slug === 'corporate') {
+            return 'Site Installation';
         }
 
         foreach (self::filters() as $filter) {
@@ -179,14 +205,21 @@ class Portfolio
 
                 $index++;
                 $filename = $file->getFilename();
+                $itemKey = $definition['slug'].'-'.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+                $filenameKey = $definition['folder'].'/'.$filename;
+                $override = self::FILENAME_OVERRIDES[$filenameKey] ?? null;
+                $title = $override['title'] ?? self::compositionTitle($definition['label'], $index);
+                $slug = $override['slug'] ?? $itemKey;
+                $category = $override['category'] ?? $definition['label'];
+                $categorySlug = $override['categorySlug'] ?? $definition['slug'];
 
                 $items[] = [
-                    'title' => self::compositionTitle($definition['label'], $index),
+                    'title' => $title,
                     'src' => self::assetPublicUrl($definition['folder'], $filename),
-                    'category' => $definition['label'],
-                    'alt' => 'WOW Events — '.$definition['label'].' portfolio photograph',
-                    'slug' => $definition['slug'].'-'.str_pad((string) $index, 2, '0', STR_PAD_LEFT),
-                    'categorySlug' => $definition['slug'],
+                    'category' => $category,
+                    'alt' => 'WOW Events — '.$title,
+                    'slug' => $slug,
+                    'categorySlug' => $categorySlug,
                 ];
             }
         }

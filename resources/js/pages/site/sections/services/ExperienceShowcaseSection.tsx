@@ -16,11 +16,11 @@ const experiences = [
     },
     {
         icon: Building2,
-        eyebrow: 'Corporate',
-        title: 'Boardroom to ballroom',
-        body: 'Leadership summits, product launches, and award nights with brand precision, acoustic balance, and invisible operational stewardship.',
-        image: '/assets/11.jpeg',
-        href: '/our-work/corporate',
+        eyebrow: 'Site Installation',
+        title: 'On-site brand environments',
+        body: 'Welcome boards, entrance gates, mandaps, reception stages, and centerpieces—installed with brand precision and invisible operational stewardship.',
+        image: '/assets/8.jpeg',
+        href: '/our-work/site-installation',
     },
     {
         icon: Sparkles,

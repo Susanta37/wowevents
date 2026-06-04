@@ -8,7 +8,7 @@ const easeLuxury = [0.25, 0.46, 0.45, 0.94] as const;
 const gallery = [
     { src: '/assets/6.jpeg', title: 'Auberge Celebration', category: 'Luxury Events' },
     { src: '/assets/7.jpeg', title: 'Pearl Reception', category: 'Wedding' },
-    { src: '/assets/8.jpeg', title: 'Gilded Hour', category: 'Corporate' },
+    { src: '/assets/8.jpeg', title: 'Site installation', category: 'Site Installation' },
     { src: '/assets/10.jpeg', title: 'Meridian Night', category: 'Luxury Events' },
     { src: '/assets/12.jpeg', title: 'Solstice Soirée', category: 'Wedding' },
     { src: '/assets/15.jpeg', title: 'Silk Canopy', category: 'Wedding' },
