@@ -10,7 +10,7 @@ const panels = [
         title: 'Stories told in restrained gold',
         subtitle: 'Where every detail whispers, never shouts',
         body: 'We script arrival light, choreography of servers, tonal florals—all echoing the architecture you chose. From the first glass of champagne to the final candle flicker, every moment is composed like a symphony. Nothing shouts, yet everything speaks.',
-        stat: '200+',
+        stat: '5000+',
         statLabel: 'Events curated',
         icon: Sparkles,
         gradient: 'from-amber-500/10 via-[#d4af37]/5 to-transparent',

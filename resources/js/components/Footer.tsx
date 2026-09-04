@@ -179,7 +179,7 @@ export function Footer() {
 
                         <div className="grid max-w-sm grid-cols-3 gap-4 border-t border-white/[0.06] pt-7">
                             {[
-                                { value: '200+', label: 'Brands' },
+                                { value: '5000+', label: 'Brands' },
                                 { value: '500+', label: 'Events' },
                                 { value: '15+', label: 'Years' },
                             ].map((stat) => (

@@ -112,7 +112,7 @@ export function ClientLogoSection() {
                     viewport={{ once: true }}
                     className="mt-14 text-center text-xs uppercase tracking-[0.2em] text-stone-500"
                 >
-                    200+ distinguished clients across West Bengal & India
+                    5000+ distinguished clients across West Bengal & India
                 </motion.p>
             </div>
 

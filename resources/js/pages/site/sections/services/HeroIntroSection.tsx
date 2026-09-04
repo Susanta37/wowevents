@@ -7,7 +7,7 @@ export function HeroIntroSection() {
 
     const serviceHighlights = [
         { value: '6', label: 'Core Disciplines' },
-        { value: '40+', label: 'Specialist Artisans' },
+        { value: '100+', label: 'Specialist Artisans' },
         { value: '100%', label: 'Tailored to Brief' },
     ];
 
