@@ -6,9 +6,9 @@ const easeLuxury = [0.25, 0.46, 0.45, 0.94] as const;
 
 const stats = [
     { value: 6, suffix: '', label: 'Core Disciplines', detail: 'End-to-end under one roof' },
-    { value: 40, suffix: '+', label: 'In-House Specialists', detail: 'Design, production & execution' },
-    { value: 200, suffix: '+', label: 'Brands Trusted', detail: 'Across West Bengal & India' },
-    { value: 360, suffix: '°', label: 'Full Production', detail: 'Concept through final toast' },
+    { value: 100, suffix: '+', label: 'In-House Specialists', detail: 'Design, production & execution' },
+    { value: 500, suffix: '+', label: 'Brands Trusted', detail: 'Across West Bengal & India' },
+    { value: 660, suffix: '°', label: 'Full Production', detail: 'Concept through final toast' },
 ];
 
 function AnimatedStat({

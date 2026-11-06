@@ -14,11 +14,41 @@ const clients = [
     { name: 'East India Company', logo: '/logos/east-india-company.svg' },
     { name: 'Heritage Resorts', logo: '/logos/heritage-resorts.svg' },
     { name: 'Calcutta Club', logo: '/logos/calcutta-club.svg' },
+    { name: 'ITC Royal', logo: '' },
+    { name: 'Taj CC2', logo: '' },
+    { name: 'Vivanta', logo: '' },
+    { name: 'Hyatt Regency', logo: '' },
+    { name: 'Hyatt Centric', logo: '' },
+    { name: 'JW Marriott', logo: '' },
+    { name: 'Novotel', logo: '' },
+    { name: 'Fairfield Marriott', logo: '' },
+    { name: 'Barge', logo: '' },
+    { name: 'The Stadel', logo: '' },
+    { name: 'Raj Kutir', logo: '' },
+    { name: 'Altair', logo: '' },
+    { name: 'Taj Tal Kuthir', logo: '' },
+    { name: 'Ozon', logo: '' },
+    { name: 'P.C Chandra Garden', logo: '' },
+    { name: 'West Side Pavillion', logo: '' },
+    { name: 'Floatel', logo: '' },
+    { name: 'Westin', logo: '' },
+    { name: 'Kenilworth', logo: '' },
+    { name: 'RBR (Royal Bengal)', logo: '' },
+    { name: 'Peerless Inn', logo: '' },
+    { name: 'Almond', logo: '' },
+    { name: 'Princeton Club', logo: '' },
+    { name: 'Lemon Tree', logo: '' },
+    { name: 'Ibis', logo: '' },
+    { name: 'Northin', logo: '' },
+    { name: 'Holiday Inn Express', logo: '' },
+    { name: 'Holiday Inn', logo: '' },
+    { name: 'Dockyard', logo: '' },
+    { name: 'Regenta Orkos', logo: '' },
 ];
 
 // Fallback text style if logo image is missing
 const FallbackText = ({ name }: { name: string }) => (
-    <span className="whitespace-nowrap font-display text-base tracking-wide text-stone-500 transition-all duration-500 group-hover:text-[#d4af37] md:text-lg">
+    <span className="whitespace-nowrap font-display text-lg font-medium tracking-wide text-stone-300 transition-all duration-500 group-hover:text-[#d4af37] md:text-xl">
         {name}
     </span>
 );
@@ -60,7 +90,7 @@ export function ClientLogoSection() {
                         Trusted by industry leaders
                     </span>
                     <h2 className="relative mt-4 font-display text-2xl font-light tracking-tight text-stone-100 md:text-3xl lg:text-4xl">
-                        Brands that expect excellence
+                        Our Partner Hotels
                         <span className="absolute -bottom-3 left-1/2 h-px w-12 -translate-x-1/2 bg-[#d4af37]/40" />
                     </h2>
                 </motion.div>
@@ -70,23 +100,23 @@ export function ClientLogoSection() {
                     {/* Gradient masks for smooth edges */}
                     <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-32 bg-gradient-to-r from-[#080808] via-[#080808]/80 to-transparent"
+                        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[#080808] via-[#080808]/80 to-transparent md:w-32"
                     />
                     <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-32 bg-gradient-to-l from-[#080808] via-[#080808]/80 to-transparent"
+                        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[#080808] via-[#080808]/80 to-transparent md:w-32"
                     />
 
                     <div
-                        className={`flex ${prefersReducedMotion ? 'flex-wrap justify-center gap-8' : 'animate-marquee w-max gap-12'}`}
-                        style={!prefersReducedMotion ? { animationDuration: '30s' } : undefined}
+                        className={`flex ${prefersReducedMotion ? 'flex-wrap justify-center gap-6 md:gap-8' : 'animate-marquee w-max gap-8 md:gap-12'}`}
+                        style={!prefersReducedMotion ? { animationDuration: '100s' } : undefined}
                     >
                         {doubled.map((client, idx) => {
                             const hasError = imgErrors[client.name];
                             return (
                                 <div
                                     key={`${client.name}-${idx}`}
-                                    className="group flex shrink-0 cursor-default items-center justify-center px-6 py-4 transition-all duration-500 hover:scale-105"
+                                    className="group flex shrink-0 cursor-default items-center justify-center px-4 py-3 transition-all duration-500 hover:scale-105 md:px-6 md:py-4"
                                 >
                                     {!hasError && client.logo ? (
                                         <img
@@ -123,7 +153,7 @@ export function ClientLogoSection() {
                     100% { transform: translateX(-50%); }
                 }
                 .animate-marquee {
-                    animation: marquee 30s linear infinite;
+                    animation: marquee 100s linear infinite;
                 }
                 .group:hover .animate-marquee {
                     animation-play-state: paused;

@@ -8,7 +8,7 @@ const easeLuxury = [0.25, 0.46, 0.45, 0.94] as const;
 const stats = [
     { value: 200, suffix: '+', label: 'Brands Served', detail: 'Across West Bengal & India' },
     { value: 500, suffix: '+', label: 'Events Executed', detail: 'Weddings to board galas' },
-    { value: 15, suffix: '+', label: 'Years of Craft', detail: 'Since our founding in Kolkata' },
+    { value: 12, suffix: '+', label: 'Years of Craft', detail: 'Since our founding in Kolkata' },
     { value: 98, suffix: '%', label: 'Client Return Rate', detail: 'Trust built event by event' },
 ];
 

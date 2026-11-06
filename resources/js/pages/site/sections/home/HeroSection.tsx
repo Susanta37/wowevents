@@ -11,7 +11,10 @@ const CINEMATIC_BREAKPOINT = '(min-width: 768px)';
 const MOBILE_HERO_POSTER = '/Event/ezgif-frame-001.webp';
 
 export function HeroSection() {
-    const totalFrames = 240;
+    // 120 logical frames — each maps to every other file (1→001, 2→003 … 120→239).
+    // This halves the total download (~50 MB saved) with no visible quality loss
+    // at normal scroll speeds.
+    const totalFrames = 120;
     const heroRef = useRef<HTMLDivElement>(null);
     const [useCinematic, setUseCinematic] = useState(false);
 
@@ -26,7 +29,9 @@ export function HeroSection() {
     }, []);
 
     const framePath = useCallback((index: number) => {
-        const paddedIndex = String(index).padStart(3, '0');
+        // Map logical index (1–120) → actual file index (1, 3, 5 … 239).
+        const actualIndex = index * 2 - 1;
+        const paddedIndex = String(actualIndex).padStart(3, '0');
 
         return `/Event/ezgif-frame-${paddedIndex}.webp`;
     }, []);

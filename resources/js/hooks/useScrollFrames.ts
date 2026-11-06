@@ -18,7 +18,7 @@ export function useScrollFrames(
     const enabled = options?.enabled ?? true;
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const imagesRef = useRef<HTMLImageElement[]>([]);
+    const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
     const [progress, setProgress] = useState(0);
 
     const scrollTarget = useRef(0);
@@ -31,7 +31,7 @@ export function useScrollFrames(
         enabled,
     );
 
-    // Update images ref when loaded
+    // Keep images ref in sync whenever the state array changes.
     useEffect(() => {
         imagesRef.current = images;
     }, [images]);
@@ -50,7 +50,6 @@ export function useScrollFrames(
             }
 
             const rect = containerRef.current.getBoundingClientRect();
-            // rect.top is 0 when container is at the top of the viewport
             const maxScroll = rect.height - window.innerHeight;
             let currentScroll = -rect.top;
 
@@ -71,15 +70,18 @@ export function useScrollFrames(
             const prev = scrollCurrent.current;
             const target = scrollTarget.current;
 
+            // Snap to target when close enough to avoid infinite micro-lerp.
             if (Math.abs(target - prev) < 0.0001) {
                 scrollCurrent.current = target;
             } else {
-                scrollCurrent.current = lerp(prev, target, 0.08);
+                // Slightly higher lerp factor (0.1) for snappier response.
+                scrollCurrent.current = lerp(prev, target, 0.1);
             }
 
             const currentProgress = scrollCurrent.current;
 
-            // Throttle state updates to reduce React re-renders, but allow enough precision for Framer Motion phases
+            // Throttle React state updates — only trigger when phase thresholds
+            // are crossed (reduces framer-motion re-renders).
             setProgress((prevProg) => {
                 const rounded = Math.round(currentProgress * 100) / 100;
 
@@ -88,10 +90,10 @@ export function useScrollFrames(
 
             const frameIndex = Math.min(
                 totalFrames - 1,
-                Math.floor(currentProgress * totalFrames)
+                Math.floor(currentProgress * totalFrames),
             );
 
-            // Only redraw if the frame has actually changed
+            // Only redraw if the frame index has actually changed.
             if (frameIndex === lastDrawnFrame.current) {
                 return;
             }
@@ -105,16 +107,30 @@ export function useScrollFrames(
             }
 
             const ctx = canvas.getContext('2d');
-            const images = imagesRef.current;
+            const imgs = imagesRef.current;
 
-            if (!images || images.length === 0) {
+            if (!imgs || imgs.length === 0) {
                 return;
             }
 
-            const img = images[frameIndex];
+            // Use the exact frame if loaded; otherwise walk back to find
+            // the nearest loaded frame so the canvas never goes blank while
+            // background frames are still downloading.
+            let img = imgs[frameIndex];
 
-            if (ctx && img && img.complete) {
-                // Device Pixel Ratio scaling (capped to 1.5 for performance)
+            if (!img?.complete) {
+                for (let back = frameIndex - 1; back >= 0; back--) {
+                    const candidate = imgs[back];
+
+                    if (candidate?.complete) {
+                        img = candidate;
+                        break;
+                    }
+                }
+            }
+
+            if (ctx && img?.complete) {
+                // Cap device pixel ratio to 1.5 for canvas performance.
                 const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
                 const rect = canvas.getBoundingClientRect();
 
@@ -147,7 +163,7 @@ export function useScrollFrames(
                     offsetY = (displayHeight - drawHeight) / 2;
                 }
 
-                // Add slight canvas scale (1 -> 1.05) across scroll
+                // Subtle zoom across the full scroll (1× → 1.05×).
                 const zoom = 1 + currentProgress * 0.05;
                 const zoomedWidth = drawWidth * zoom;
                 const zoomedHeight = drawHeight * zoom;

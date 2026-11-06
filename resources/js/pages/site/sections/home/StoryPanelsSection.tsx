@@ -34,7 +34,7 @@ const panels = [
         title: 'Design that disappears into feeling',
         subtitle: 'When the aesthetic becomes the atmosphere',
         body: 'Tablescapes that frame conversation. Lighting that sculpts emotion. Sound that wraps around shoulders like cashmere. We design not to impress, but to immerse—creating environments where design dissolves and only feeling remains. Your guests will remember how it felt, not what it looked like.',
-        stat: '15+',
+        stat: '12+',
         statLabel: 'Years of mastery',
         icon: Eye,
         gradient: 'from-transparent via-[#d4af37]/5 to-amber-500/10',

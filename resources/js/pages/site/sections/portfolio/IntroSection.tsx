@@ -10,7 +10,7 @@ export function IntroSection({ active }: Props) {
     const easeLuxury = [0.25, 0.46, 0.45, 0.94];
 
     const portfolioStats = [
-        { value: '300+', label: 'Events Captured' },
+        { value: '3000+', label: 'Events Captured' },
         { value: '18', label: 'Cities Worldwide' },
         { value: '4', label: 'Signature Typologies' },
     ];

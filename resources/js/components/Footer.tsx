@@ -181,7 +181,7 @@ export function Footer() {
                             {[
                                 { value: '5000+', label: 'Brands' },
                                 { value: '500+', label: 'Events' },
-                                { value: '15+', label: 'Years' },
+                                { value: '12+', label: 'Years' },
                             ].map((stat) => (
                                 <div key={stat.label}>
                                     <span className="block font-display text-xl text-stone-200">

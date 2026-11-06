@@ -6,7 +6,7 @@ export function HeroIntroSection() {
     const easeLuxury = [0.25, 0.46, 0.45, 0.94];
 
     const stats = [
-        { value: '15+', label: 'Years of Excellence' },
+        { value: '12+', label: 'Years of Excellence' },
         { value: '500+', label: 'Moments Curated' },
         { value: '98%', label: 'Client Trust Rate' },
     ];
@@ -130,7 +130,7 @@ export function HeroIntroSection() {
                             className="hidden items-center gap-1.5 text-[10px] uppercase tracking-[0.3em] text-stone-500 sm:flex"
                         >
                             <Award className="h-3 w-3 text-[#d4af37]/40" />
-                            Since 2009
+                            Since 2014
                         </motion.span>
                     </motion.div>
 
