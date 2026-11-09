@@ -18,9 +18,9 @@ export const SITE_CONTACT = {
         { display: '+91 9147717068', e164: '+919147717068' },
         { display: '+91 9147717069', e164: '+919147717069' },
     ] satisfies CompanyPhone[],
-    addressLine:
-        '3RD, FLAT NO. 3B, 3/19, VIDYASAGAR COLONY, KOLKATA, Kolkata, West Bengal, 700047',
-    addressShort: 'Flat 3B, Vidyasagar Colony, Kolkata 700047',
+    regdNo: '1920984039338',
+    addressLine: '28 VIVEKANANDA PARK, AJAY NAGAR, KOLKATA - 700 099',
+    addressShort: '28 Vivekananda Park, Ajay Nagar, Kolkata 700099',
 } as const;
 
 export function whatsappChatUrl(prefill?: string): string {

@@ -1,53 +1,38 @@
 import { Link } from '@inertiajs/react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, Sparkles, Crown } from 'lucide-react';
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowDown, Crown, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Loader } from '@/components/Loader';
-import { SITE_LOGO_ALT, SITE_LOGO_SRC } from '@/constants/brand-assets';
-import { useScrollFrames } from '@/hooks/useScrollFrames';
+import {
+    HERO_VIDEO_POSTER,
+    HERO_VIDEO_SRC,
+    SITE_LOGO_ALT,
+    SITE_LOGO_SRC,
+} from '@/constants/brand-assets';
 
-const CINEMATIC_BREAKPOINT = '(min-width: 768px)';
-const MOBILE_HERO_POSTER = '/Event/ezgif-frame-001.webp';
+const easeLuxury: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
 export function HeroSection() {
-    // 120 logical frames — each maps to every other file (1→001, 2→003 … 120→239).
-    // This halves the total download (~50 MB saved) with no visible quality loss
-    // at normal scroll speeds.
-    const totalFrames = 120;
+    const containerRef = useRef<HTMLDivElement>(null);
     const heroRef = useRef<HTMLDivElement>(null);
-    const [useCinematic, setUseCinematic] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
-    useLayoutEffect(() => {
-        const mq = window.matchMedia(CINEMATIC_BREAKPOINT);
-        const apply = () => setUseCinematic(mq.matches);
-        apply();
+    const [progress, setProgress] = useState(0);
+    const scrollProgressRef = useRef(0);
+    const isSeekingRef = useRef(false);
 
-        mq.addEventListener('change', apply);
+    // Mouse-responsive parallax state
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const targetMouseRef = useRef({ x: 0, y: 0 });
+    const currentMouseRef = useRef({ x: 0, y: 0 });
 
-        return () => mq.removeEventListener('change', apply);
-    }, []);
-
-    const framePath = useCallback((index: number) => {
-        // Map logical index (1–120) → actual file index (1, 3, 5 … 239).
-        const actualIndex = index * 2 - 1;
-        const paddedIndex = String(actualIndex).padStart(3, '0');
-
-        return `/Event/ezgif-frame-${paddedIndex}.webp`;
-    }, []);
-
-    const { containerRef, canvasRef, progress, isLoaded, loadProgress } = useScrollFrames(
-        totalFrames,
-        framePath,
-        { enabled: useCinematic },
-    );
-
-    // Parallax scroll values for overlay elements
+    // Scroll progress through pinned 400vh container
     const { scrollYProgress } = useScroll({
-        target: heroRef,
+        target: containerRef,
         offset: ['start start', 'end end'],
     });
 
+    // Parallax scroll and lighting values
     const textOpacity = useTransform(
         scrollYProgress,
         [0, 0.02, 0.95, 1],
@@ -59,16 +44,102 @@ export function HeroSection() {
         [1, 0.6, 0],
     );
     const progressBarWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+    const goldGlowOpacity = useTransform(
+        scrollYProgress,
+        [0, 0.25, 0.55, 0.82, 1],
+        [0.15, 0.38, 0.55, 0.38, 0.2],
+    );
+    const cameraScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
-    const easeLuxury: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
+    // Track scroll progress across the timeline
+    useEffect(() => {
+        const unsubscribe = scrollYProgress.on('change', (latest) => {
+            scrollProgressRef.current = latest;
+            const rounded = Math.round(latest * 100) / 100;
+            setProgress((prev) => (Math.abs(prev - rounded) >= 0.01 ? rounded : prev));
+        });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [scrollYProgress]);
+
+    // Smooth video scrubbing loop tied to scroll progress
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) {
+            return;
+        }
+
+        let animationFrameId: number;
+
+        const onFrame = () => {
+            animationFrameId = requestAnimationFrame(onFrame);
+
+            const currentProg = scrollProgressRef.current;
+            const dur = video.duration || 10;
+            const targetTime = Math.min(dur, Math.max(0, currentProg * dur));
+
+            if (!isSeekingRef.current && Math.abs(video.currentTime - targetTime) > 0.04) {
+                isSeekingRef.current = true;
+                if ('fastSeek' in video) {
+                    try {
+                        (video as any).fastSeek(targetTime);
+                    } catch {
+                        video.currentTime = targetTime;
+                    }
+                } else {
+                    video.currentTime = targetTime;
+                }
+            }
+        };
+
+        const handleSeeked = () => {
+            isSeekingRef.current = false;
+        };
+
+        video.addEventListener('seeked', handleSeeked);
+        animationFrameId = requestAnimationFrame(onFrame);
+
+        return () => {
+            video.removeEventListener('seeked', handleSeeked);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, []);
+
+    // Mouse parallax tracking with smooth lerp damping
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            const { innerWidth, innerHeight } = window;
+            targetMouseRef.current = {
+                x: (e.clientX / innerWidth) * 2 - 1,
+                y: (e.clientY / innerHeight) * 2 - 1,
+            };
+        };
+
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+        let rafId: number;
+        const lerpMouse = () => {
+            rafId = requestAnimationFrame(lerpMouse);
+            const prev = currentMouseRef.current;
+            const target = targetMouseRef.current;
+            const x = prev.x + (target.x - prev.x) * 0.08;
+            const y = prev.y + (target.y - prev.y) * 0.08;
+            currentMouseRef.current = { x, y };
+            setMousePos({ x, y });
+        };
+        rafId = requestAnimationFrame(lerpMouse);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            cancelAnimationFrame(rafId);
+        };
+    }, []);
 
     return (
         <>
-            {useCinematic ? (
-                <Loader isLoaded={isLoaded} progress={loadProgress} />
-            ) : null}
-
-            {/* Desktop: Cinematic Scroll Sequence */}
+            {/* Desktop: Pinned Cinematic Scroll-Scrubbed Hero (400vh) */}
             <section
                 id="cinematic-hero-section"
                 ref={containerRef}
@@ -79,13 +150,29 @@ export function HeroSection() {
                     ref={heroRef}
                     className="sticky top-0 flex h-[100svh] w-full flex-col overflow-hidden bg-[#0A0A0A]"
                 >
-                    {/* Canvas Layer */}
-                    <canvas
-                        ref={canvasRef}
-                        className="absolute inset-0 z-10 h-full w-full object-cover"
-                    />
+                    {/* CDN Video Stage Layer with Camera Scale & 3D Mouse Parallax */}
+                    <motion.div
+                        className="absolute inset-0 z-10 h-full w-full overflow-hidden"
+                        style={{
+                            scale: cameraScale,
+                            x: mousePos.x * 14,
+                            y: mousePos.y * 10,
+                            rotateX: -mousePos.y * 1.5,
+                            rotateY: mousePos.x * 1.5,
+                        }}
+                    >
+                        <video
+                            ref={videoRef}
+                            src={HERO_VIDEO_SRC}
+                            poster={HERO_VIDEO_POSTER}
+                            preload="auto"
+                            muted
+                            playsInline
+                            className="h-full w-full object-cover brightness-[0.38] contrast-[1.05]"
+                        />
+                    </motion.div>
 
-                    {/* Cinematic Overlay - Refined depth layers */}
+                    {/* Cinematic Overlay - Multi-layer Vignette and Depth */}
                     <div className="pointer-events-none absolute inset-0 z-20">
                         {/* Vignette */}
                         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(10,10,10,0.85)_100%)]" />
@@ -98,27 +185,29 @@ export function HeroSection() {
                         <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-l from-[#0A0A0A]/50 to-transparent" />
                     </div>
 
-                    {/* Dynamic gold ambient glow */}
+                    {/* Dynamic Gold Ambient Glow with Depth Parallax */}
                     <motion.div
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 z-20"
+                        className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
                         style={{
-                            opacity: useTransform(
-                                scrollYProgress,
-                                [0, 0.25, 0.55, 0.82, 1],
-                                [0, 0.35, 0.55, 0.35, 0],
-                            ),
+                            opacity: goldGlowOpacity,
+                            x: mousePos.x * 32,
+                            y: mousePos.y * 22,
                         }}
                     >
-                        <div className="absolute left-1/2 top-1/2 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.1)_0%,transparent_55%)] blur-3xl" />
+                        <div className="h-[600px] w-[900px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.18)_0%,transparent_60%)] blur-3xl" />
                     </motion.div>
 
-                    {/* Main Content Layer */}
+                    {/* Main Content Layer with 3D Depth Transitions */}
                     <motion.div
                         className="absolute inset-0 z-30 flex flex-col items-center justify-center"
-                        style={{ opacity: textOpacity }}
+                        style={{
+                            opacity: textOpacity,
+                            x: -mousePos.x * 8,
+                            y: -mousePos.y * 6,
+                        }}
                     >
-                        {/* Corner frame accents */}
+                        {/* Corner Frame Accents */}
                         <div
                             aria-hidden="true"
                             className="absolute left-8 top-8 h-14 w-14 border-l border-t border-[#D4AF37]/15 md:left-14 md:top-14 lg:left-20 lg:top-20"
@@ -237,7 +326,6 @@ export function HeroSection() {
                                         }}
                                         className="flex w-full max-w-6xl flex-col items-center px-4"
                                     >
-
                                         <h1
                                             className="font-serif text-[2.75rem] font-bold leading-[1.1] tracking-tight md:text-6xl lg:text-[5.5rem]"
                                             style={{
@@ -486,7 +574,7 @@ export function HeroSection() {
                         </motion.div>
                     </motion.div>
 
-                    {/* Progress bar */}
+                    {/* Progress Bar */}
                     <motion.div className="absolute bottom-0 left-0 right-0 z-30 h-px bg-white/[0.02]">
                         <motion.div
                             className="h-full bg-gradient-to-r from-[#D4AF37]/35 via-[#D4AF37]/55 to-[#D4AF37]/35"
@@ -496,20 +584,20 @@ export function HeroSection() {
                 </div>
             </section>
 
-            {/* Mobile: static hero — no 240-frame preload (instant first paint) */}
+            {/* Mobile: Smooth Video Hero with Instant First Paint */}
             <section className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#0A0A0A] pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(4.5rem,env(safe-area-inset-top))] md:hidden">
                 <div className="absolute inset-0 z-0">
-                    <img
-                        src={MOBILE_HERO_POSTER}
-                        alt=""
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        poster={HERO_VIDEO_POSTER}
                         className="h-full w-full object-cover brightness-[0.32]"
-                        width={1920}
-                        height={1080}
-                        sizes="100vw"
-                        decoding="async"
-                        fetchPriority="high"
-                        loading="eager"
-                    />
+                    >
+                        <source src={HERO_VIDEO_SRC} type="video/mp4" />
+                    </video>
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/45 to-[#0A0A0A]/82" />
                 </div>
 

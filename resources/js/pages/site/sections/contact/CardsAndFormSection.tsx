@@ -151,10 +151,13 @@ export function CardsAndFormSection() {
                                         Studio address
                                     </p>
                                     <p className={`mt-2 ${contactValueClass}`}>
-                                        3/19, Vidyasagar Colony
+                                        28 Vivekananda Park, Ajay Nagar
                                     </p>
                                     <p className={contactValueClass}>
-                                        Kolkata, West Bengal 700047
+                                        Kolkata, West Bengal - 700 099
+                                    </p>
+                                    <p className="mt-1 font-sans text-xs text-stone-500">
+                                        Regd. No.: {SITE_CONTACT.regdNo}
                                     </p>
                                     <p className="mt-2 font-sans text-[13px] text-stone-500">
                                         Visits by appointment

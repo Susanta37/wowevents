@@ -269,6 +269,9 @@ export function Footer() {
                                         Studio
                                     </span>
                                     {SITE_CONTACT.addressShort}
+                                    <span className="block text-[11px] text-stone-600">
+                                        Regd. No.: {SITE_CONTACT.regdNo}
+                                    </span>
                                 </span>
                             </li>
                         </ul>
